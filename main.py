@@ -1,9 +1,12 @@
 import pygame
 from pygame import *
 from sprites import *
+from textvitesse import TextVitesse
 from vaisseau import Vaisseau
 from textbouclier import TextBouclier
 from bouclier import Bouclier
+from textvitesse import TextVitesse
+from vitesse import Vitesse
 from explosion import Explosion
 from ennemi import Ennemi
 from score import Score
@@ -29,7 +32,10 @@ AJOUTE_ETOILE = pygame.USEREVENT + 2
 pygame.time.set_timer(AJOUTE_ETOILE, 50)
 # Événement création d'un bouclier
 AJOUTE_BOUCLIER = pygame.USEREVENT + 3
-pygame.time.set_timer(AJOUTE_BOUCLIER, 20000)
+pygame.time.set_timer(AJOUTE_BOUCLIER, 27000)
+# Événement création d'un vitesse x2
+AJOUTE_VITESSE = pygame.USEREVENT + 4
+pygame.time.set_timer(AJOUTE_VITESSE, 45000)
 
 # Création de la surface principale
 ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
@@ -39,6 +45,8 @@ vaisseau = Vaisseau()
 tous_sprites.add(vaisseau)
 text_bouclier = TextBouclier(vaisseau)
 tous_sprites.add(text_bouclier)
+text_vitesse = TextVitesse(vaisseau)
+tous_sprites.add(text_vitesse)
 score = Score()
 tous_sprites.add(score)
 
@@ -69,6 +77,12 @@ while continuer:
             # Ajout du bouclier aux groupes
             les_boucliers.add(nouveau_bouclier)
             tous_sprites.add(nouveau_bouclier)
+        # Création d'un nouveau vitesse
+        elif event.type == AJOUTE_VITESSE:
+            nouveau_vitesse = Vitesse()
+            # Ajout du bouclier aux groupes
+            les_vitesses.add(nouveau_vitesse)
+            tous_sprites.add(nouveau_vitesse)
 
     # Remplissage de l'écran en noir
     ecran.fill((0, 0, 0))
@@ -90,6 +104,13 @@ while continuer:
             bouclier.kill()
             vaisseau.set_bouclier()
 
+    # Détection des collisions Vaisseau / Vitesse x2
+    for vitesse in les_vitesses:
+        liste_vitesses_touches = pygame.sprite.spritecollide(vaisseau, les_vitesses, False)
+        if len(liste_vitesses_touches) > 0:
+            vitesse.kill()
+            vaisseau.set_vitesse()
+
     # Détection des collisions Missile / Ennemi
     for missile in le_missile:
         liste_ennemi_touches = pygame.sprite.spritecollide(missile, les_ennemis, True)
@@ -107,11 +128,13 @@ while continuer:
     # Mise à jour des éléments
     vaisseau.update(touche_appuyee)
     text_bouclier.update()
+    text_vitesse.update()
     le_missile.update()
     les_ennemis.update()
     les_explosions.update()
     les_etoiles.update()
     les_boucliers.update()
+    les_vitesses.update()
     score.update()
 
     # Les objets sont recopiés sur la surface écran
