@@ -13,7 +13,7 @@ class Ennemi(pygame.sprite.Sprite):
         self.surf = pygame.transform.scale(self.surf, (80, 40))
         self.surf.convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
-        self.rect = self.surf.get_rect(center=(LARGEUR_ECRAN + 50, random.randint(0, HAUTEUR_ECRAN)))
+        self.rect = self.surf.get_rect(center=(LARGEUR_ECRAN + 200, random.randint(0, HAUTEUR_ECRAN)))
         self.speed = random.randint(5, 15)
 
     def update(self):

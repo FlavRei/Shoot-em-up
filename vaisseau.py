@@ -16,6 +16,8 @@ class Vaisseau(pygame.sprite.Sprite):
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center=(100, (HAUTEUR_ECRAN / 2)))
         self.bouclier = False
+        self.textbouclier = None
+        self.textvitesse = None
         self.vitesse = 5
         self.cpt = 600
 
@@ -46,15 +48,30 @@ class Vaisseau(pygame.sprite.Sprite):
         if self.bouclier or self.vitesse == 10:
             self.decremente()
 
-    def set_bouclier(self):
-        self.bouclier = True
+    def set_text_bouclier(self, textbouclier):
+        self.textbouclier = textbouclier
 
-    def set_vitesse(self):
-        self.vitesse += 5
+    def set_text_vitesse(self, textvitesse):
+        self.textvitesse = textvitesse
+
+    def set_bouclier(self, bool):
+        self.bouclier = bool
+        self.has_bonus = bool
+
+    def set_vitesse(self, int):
+        self.vitesse = int
+
+    def reset_bonus(self):
+        self.set_bouclier(False)
+        self.set_vitesse(5)
+        self.cpt = 600
+        self.textbouclier.pourcentage = 100
+        self.textvitesse.pourcentage = 100
+
 
     def decremente(self):
         self.cpt -= 1
         if self.cpt <= 0:
-            self.bouclier = False
-            self.vitesse = 5
+            self.set_bouclier(False)
+            self.set_vitesse(5)
             self.cpt = 600
