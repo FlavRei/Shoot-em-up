@@ -56,7 +56,6 @@ class Vaisseau(pygame.sprite.Sprite):
 
     def set_bouclier(self, bool):
         self.bouclier = bool
-        self.has_bonus = bool
 
     def set_vitesse(self, int):
         self.vitesse = int

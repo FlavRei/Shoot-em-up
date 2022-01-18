@@ -1,5 +1,6 @@
 import pygame
 from pygame import *
+from meteorite import Meteorite
 from sprites import *
 from textvitesse import TextVitesse
 from vaisseau import Vaisseau
@@ -36,7 +37,7 @@ pygame.display.set_caption("Shoot'em up")
 
 # Événement création d'un ennemi
 AJOUTE_ENNEMI = pygame.USEREVENT + 1
-pygame.time.set_timer(AJOUTE_ENNEMI, 500)
+pygame.time.set_timer(AJOUTE_ENNEMI, 1000)
 # Événement création d'une étoile
 AJOUTE_ETOILE = pygame.USEREVENT + 2
 pygame.time.set_timer(AJOUTE_ETOILE, 50)
@@ -46,6 +47,9 @@ pygame.time.set_timer(AJOUTE_BOUCLIER, 27000)
 # Événement création d'un vitesse x2
 AJOUTE_VITESSE = pygame.USEREVENT + 4
 pygame.time.set_timer(AJOUTE_VITESSE, 45000)
+# Événement création d'une météorite
+AJOUTE_METEORITE = pygame.USEREVENT + 5
+pygame.time.set_timer(AJOUTE_METEORITE, 5000)
 
 # Création de la surface principale
 ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
@@ -61,6 +65,7 @@ vaisseau.set_text_vitesse(text_vitesse)
 tous_sprites.add(text_vitesse)
 score = Score()
 tous_sprites.add(score)
+
 
 def game_over():
     over = my_font.render("Game Over", 1, (255, 255, 255))
@@ -134,18 +139,23 @@ while continuer:
                 # Ajout du bouclier aux groupes
                 les_vitesses.add(nouveau_vitesse)
                 tous_sprites.add(nouveau_vitesse)
+            # Création d'une nouvelle météorite
+            elif event.type == AJOUTE_METEORITE:
+                nouvelle_meteorite = Meteorite()
+                # Ajout de la météorite aux groupes
+                les_meteorite.add(nouvelle_meteorite)
+                tous_sprites.add(nouvelle_meteorite)
 
         # Remplissage de l'écran en noir
         ecran.fill((0, 0, 0))
 
-        # Détection des collisions Vaisseau / Ennemi
-        if pygame.sprite.spritecollideany(vaisseau, les_ennemis):
-            if not vaisseau.bouclier:
-                vaisseau.kill()
+        # Détection des collisions Vaisseau / Ennemi et Vaisseau / Météorite
+        if pygame.sprite.spritecollideany(vaisseau, les_ennemis) or pygame.sprite.spritecollideany(vaisseau, les_meteorite):
             explosion = Explosion(vaisseau.rect.center)
             les_explosions.add(explosion)
             tous_sprites.add(explosion)
             if not vaisseau.bouclier:
+                pygame.time.delay(1000)
                 game_over()
                 pygame.time.delay(3000)
                 vaisseau = Vaisseau()
@@ -158,7 +168,7 @@ while continuer:
                 tous_sprites.add(text_vitesse)
                 score = Score()
                 tous_sprites.add(score)
-                accueil = True
+                accueil = True           
 
         # Détection des collisions Vaisseau / Bouclier
         for bouclier in les_boucliers:
@@ -201,6 +211,7 @@ while continuer:
         les_boucliers.update()
         les_vitesses.update()
         score.update()
+        les_meteorite.update()
 
         # Les objets sont recopiés sur la surface écran
         for mon_sprite in tous_sprites:

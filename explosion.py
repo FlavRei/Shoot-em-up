@@ -9,9 +9,9 @@ class Explosion(pygame.sprite.Sprite):
 
     def __init__(self, center_vaisseau):
         super(Explosion, self).__init__()
-        self._compteur = 10
+        self._compteur = 15
         self.surf = pygame.image.load('img/explosion.png')
-        self.surf = pygame.transform.scale(self.surf, (100, 100))
+        self.surf = pygame.transform.scale(self.surf, (150, 150))
         self.surf.convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center=center_vaisseau)
@@ -21,3 +21,4 @@ class Explosion(pygame.sprite.Sprite):
         self._compteur = self._compteur - 1
         if self._compteur == 0:
             self.kill()
+            self._compteur = 15
