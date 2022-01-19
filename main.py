@@ -1,6 +1,5 @@
 import pygame
 from pygame import *
-from meteorite import Meteorite
 from sprites import *
 from textvitesse import TextVitesse
 from vaisseau import Vaisseau
@@ -12,6 +11,8 @@ from explosion import Explosion
 from ennemi import Ennemi
 from score import Score
 from etoile import Etoile
+from meteorite import Meteorite
+from boss import Boss
 
 
 LARGEUR_ECRAN = 800
@@ -35,7 +36,7 @@ title = my_font.render("Shoot'Em Up", 1, (255, 255, 255))
 pygame.init()
 pygame.display.set_caption("Shoot'em up")
 
-# Événement création d'un ennemi
+# # Événement création d'un ennemi
 AJOUTE_ENNEMI = pygame.USEREVENT + 1
 pygame.time.set_timer(AJOUTE_ENNEMI, 1000)
 # Événement création d'une étoile
@@ -50,6 +51,9 @@ pygame.time.set_timer(AJOUTE_VITESSE, 45000)
 # Événement création d'une météorite
 AJOUTE_METEORITE = pygame.USEREVENT + 5
 pygame.time.set_timer(AJOUTE_METEORITE, 5000)
+# Événement création d'un boss
+AJOUTE_BOSS = pygame.USEREVENT + 6
+pygame.time.set_timer(AJOUTE_BOSS, 60000)
 
 # Création de la surface principale
 ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
@@ -78,6 +82,7 @@ def game_over():
     pygame.display.flip()
     for sprite in tous_sprites:
         sprite.kill()
+    pygame.time.delay(3000)
 
 
 # Game Loop
@@ -143,21 +148,26 @@ while continuer:
             elif event.type == AJOUTE_METEORITE:
                 nouvelle_meteorite = Meteorite()
                 # Ajout de la météorite aux groupes
-                les_meteorite.add(nouvelle_meteorite)
+                les_meteorites.add(nouvelle_meteorite)
                 tous_sprites.add(nouvelle_meteorite)
+            # Création d'une nouveau boss
+            elif event.type == AJOUTE_BOSS:
+                nouveau_boss = Boss()
+                # Ajout du boss aux groupes
+                les_boss.add(nouveau_boss)
+                tous_sprites.add(nouveau_boss)
 
         # Remplissage de l'écran en noir
         ecran.fill((0, 0, 0))
 
-        # Détection des collisions Vaisseau / Ennemi et Vaisseau / Météorite
-        if pygame.sprite.spritecollideany(vaisseau, les_ennemis) or pygame.sprite.spritecollideany(vaisseau, les_meteorite):
+        # Détection des collisions Vaisseau / Ennemi - Vaisseau / Météorite - Vaisseau / Boss
+        if pygame.sprite.spritecollideany(vaisseau, les_ennemis, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_meteorites, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_boss, pygame.sprite.collide_circle):
             explosion = Explosion(vaisseau.rect.center)
             les_explosions.add(explosion)
             tous_sprites.add(explosion)
             if not vaisseau.bouclier:
                 pygame.time.delay(1000)
                 game_over()
-                pygame.time.delay(3000)
                 vaisseau = Vaisseau()
                 tous_sprites.add(vaisseau)
                 text_bouclier = TextBouclier(vaisseau)
@@ -168,7 +178,7 @@ while continuer:
                 tous_sprites.add(text_vitesse)
                 score = Score()
                 tous_sprites.add(score)
-                accueil = True           
+                accueil = True     
 
         # Détection des collisions Vaisseau / Bouclier
         for bouclier in les_boucliers:
@@ -187,7 +197,7 @@ while continuer:
                 vaisseau.set_vitesse(10)
                 
         # Détection des collisions Missile / Ennemi
-        for missile in le_missile:
+        for missile in les_missiles:
             liste_ennemi_touches = pygame.sprite.spritecollide(missile, les_ennemis, True)
             if len(liste_ennemi_touches) > 0:
                 missile.kill()
@@ -204,14 +214,15 @@ while continuer:
         vaisseau.update(touche_appuyee)
         text_bouclier.update()
         text_vitesse.update()
-        le_missile.update()
+        les_missiles.update()
         les_ennemis.update()
         les_explosions.update()
         les_etoiles.update()
         les_boucliers.update()
         les_vitesses.update()
         score.update()
-        les_meteorite.update()
+        les_meteorites.update()
+        les_boss.update()  
 
         # Les objets sont recopiés sur la surface écran
         for mon_sprite in tous_sprites:

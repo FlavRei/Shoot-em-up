@@ -15,6 +15,7 @@ class Vaisseau(pygame.sprite.Sprite):
         self.surf.convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center=(100, (HAUTEUR_ECRAN / 2)))
+        self.radius = 35
         self.bouclier = False
         self.textbouclier = None
         self.textvitesse = None
@@ -31,10 +32,10 @@ class Vaisseau(pygame.sprite.Sprite):
         if pressed_keys[K_RIGHT]:
             self.rect.move_ip(self.vitesse, 0)
         if pressed_keys[K_SPACE]:
-            if len(le_missile.sprites()) < 1: 
+            if len(les_missiles.sprites()) < 1: 
                 missile = Missile((self.rect.x, self.rect.y + 55))
                 tous_sprites.add(missile)
-                le_missile.add(missile)
+                les_missiles.add(missile)
 
         if self.rect.top < 0:
             self.rect.top = 0
