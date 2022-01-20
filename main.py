@@ -1,12 +1,9 @@
 import pygame
 from pygame import *
 from sprites import *
-from textvitesse import TextVitesse
 from vaisseau import Vaisseau
-from textbouclier import TextBouclier
-from bouclier import Bouclier
-from textvitesse import TextVitesse
-from vitesse import Vitesse
+from bouclier import Bouclier, TextBouclier
+from vitesse import Vitesse, TextVitesse
 from explosion import Explosion, ExplosionBouclier
 from ennemi import Ennemi
 from score import Score
@@ -39,7 +36,7 @@ pygame.display.set_caption("Shoot'em up")
 
 # # Événement création d'un ennemi
 AJOUTE_ENNEMI = pygame.USEREVENT + 1
-pygame.time.set_timer(AJOUTE_ENNEMI, 1000)
+pygame.time.set_timer(AJOUTE_ENNEMI, 750)
 # Événement création d'une étoile
 AJOUTE_ETOILE = pygame.USEREVENT + 2
 pygame.time.set_timer(AJOUTE_ETOILE, 50)
@@ -187,8 +184,8 @@ while continuer:
                 score = Score()
                 tous_sprites.add(score)
                 accueil = True     
-            if len(les_boss) == 0:
-                vague.reset_percent()
+                if len(les_boss) == 0:
+                    vague.reset_percent()
 
         # Détection des collisions Vaisseau / Bouclier
         for bouclier in les_boucliers:

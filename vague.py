@@ -11,7 +11,7 @@ class Vague:
 
     def __init__(self, screen):
         self.percent = 0
-        self.percent_speed = 10
+        self.percent_speed = 5
 
     def add_percent(self):
         self.percent += self.percent_speed / 100

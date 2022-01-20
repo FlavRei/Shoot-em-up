@@ -14,6 +14,8 @@ class Meteorite(pygame.sprite.Sprite):
         self.surf.convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center=(random.randint(LARGEUR_ECRAN * 2, LARGEUR_ECRAN * 3), -(random.randint(HAUTEUR_ECRAN * 2, HAUTEUR_ECRAN * 3))))
+        self.rect.x -= 20
+        self.rect.y += 20
         self.radius = 50
 
     def update(self):
