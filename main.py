@@ -7,12 +7,13 @@ from textbouclier import TextBouclier
 from bouclier import Bouclier
 from textvitesse import TextVitesse
 from vitesse import Vitesse
-from explosion import Explosion
+from explosion import Explosion, ExplosionBouclier
 from ennemi import Ennemi
 from score import Score
 from etoile import Etoile
 from meteorite import Meteorite
 from boss import Boss
+from vague import Vague
 
 
 LARGEUR_ECRAN = 800
@@ -51,9 +52,6 @@ pygame.time.set_timer(AJOUTE_VITESSE, 45000)
 # Événement création d'une météorite
 AJOUTE_METEORITE = pygame.USEREVENT + 5
 pygame.time.set_timer(AJOUTE_METEORITE, 5000)
-# Événement création d'un boss
-AJOUTE_BOSS = pygame.USEREVENT + 6
-pygame.time.set_timer(AJOUTE_BOSS, 60000)
 
 # Création de la surface principale
 ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
@@ -69,6 +67,8 @@ vaisseau.set_text_vitesse(text_vitesse)
 tous_sprites.add(text_vitesse)
 score = Score()
 tous_sprites.add(score)
+
+vague = Vague(ecran)
 
 
 def game_over():
@@ -114,18 +114,14 @@ while continuer:
                 if event.key == pygame.K_SPACE:
                     accueil = False
 
+
     # Jeu
     else:
         for event in pygame.event.get():
             # Utilisateur ferme la fenêtre
             if event.type == pygame.QUIT:
                 continuer = False
-            # Création d'un nouvel ennemi
-            elif event.type == AJOUTE_ENNEMI:
-                nouvel_ennemi = Ennemi()
-                # Ajout de l'ennemi aux groupes
-                les_ennemis.add(nouvel_ennemi)
-                tous_sprites.add(nouvel_ennemi)
+
             # Création d'une nouvelle étoile
             elif event.type == AJOUTE_ETOILE:
                 nouvelle_etoile = Etoile()
@@ -150,21 +146,33 @@ while continuer:
                 # Ajout de la météorite aux groupes
                 les_meteorites.add(nouvelle_meteorite)
                 tous_sprites.add(nouvelle_meteorite)
-            # Création d'une nouveau boss
-            elif event.type == AJOUTE_BOSS:
-                nouveau_boss = Boss()
-                # Ajout du boss aux groupes
-                les_boss.add(nouveau_boss)
-                tous_sprites.add(nouveau_boss)
+
+            # Gestion des vagues
+            if not vague.is_full_loaded():
+                # Création d'un nouvel ennemi
+                if event.type == AJOUTE_ENNEMI:
+                    nouvel_ennemi = Ennemi()
+                    # Ajout de l'ennemi aux groupes
+                    les_ennemis.add(nouvel_ennemi)
+                    tous_sprites.add(nouvel_ennemi)
+            else:
+                if len(les_boss) == 0:
+                    # Création d'une nouveau boss
+                    nouveau_boss = Boss(ecran)
+                    # Ajout du boss aux groupes
+                    les_boss.add(nouveau_boss)
+                    tous_sprites.add(nouveau_boss)
+
 
         # Remplissage de l'écran en noir
         ecran.fill((0, 0, 0))
 
         # Détection des collisions Vaisseau / Ennemi - Vaisseau / Météorite - Vaisseau / Boss
         if pygame.sprite.spritecollideany(vaisseau, les_ennemis, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_meteorites, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_boss, pygame.sprite.collide_circle):
-            explosion = Explosion(vaisseau.rect.center)
-            les_explosions.add(explosion)
-            tous_sprites.add(explosion)
+            if vaisseau.bouclier:
+                explosion = ExplosionBouclier(vaisseau.rect.center)
+                les_explosions.add(explosion)
+                tous_sprites.add(explosion)
             if not vaisseau.bouclier:
                 pygame.time.delay(1000)
                 game_over()
@@ -179,6 +187,8 @@ while continuer:
                 score = Score()
                 tous_sprites.add(score)
                 accueil = True     
+            if len(les_boss) == 0:
+                vague.reset_percent()
 
         # Détection des collisions Vaisseau / Bouclier
         for bouclier in les_boucliers:
@@ -201,11 +211,29 @@ while continuer:
             liste_ennemi_touches = pygame.sprite.spritecollide(missile, les_ennemis, True)
             if len(liste_ennemi_touches) > 0:
                 missile.kill()
-                score.incremente(len(liste_ennemi_touches)*100)
+                score.incremente(100)
             for ennemi in liste_ennemi_touches:
-                explosion = Explosion(ennemi.rect.center)
+                explosion = Explosion(ennemi.rect.center, 150)
                 les_explosions.add(explosion)
                 tous_sprites.add(explosion)
+
+        # Détection des collisions Missile / Boss
+        for missile in les_missiles:
+            liste_boss_touches = pygame.sprite.spritecollide(missile, les_boss, False)
+            if len(liste_boss_touches) > 0:
+                missile.kill()
+            for boss in liste_boss_touches:
+                explosion = Explosion((missile.rect.right, missile.rect.centery), 100)
+                les_explosions.add(explosion)
+                tous_sprites.add(explosion)
+                boss.damages()
+                if boss.is_dead():
+                    explosion = Explosion(boss.rect.center, 250)
+                    les_explosions.add(explosion)
+                    tous_sprites.add(explosion)
+                    boss.kill()
+                    score.incremente(500)
+                    vague.reset_percent()
 
         # Pile des touches appuyées
         touche_appuyee = pygame.key.get_pressed()
@@ -223,6 +251,7 @@ while continuer:
         score.update()
         les_meteorites.update()
         les_boss.update()  
+        vague.update_bar(ecran)
 
         # Les objets sont recopiés sur la surface écran
         for mon_sprite in tous_sprites:
