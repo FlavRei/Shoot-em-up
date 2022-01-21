@@ -8,6 +8,7 @@ from tir_infini import TirInfini, TextTirInfini
 from explosion import Explosion, ExplosionBouclier
 from ennemi import Ennemi
 from score import Score
+from vie import Vie
 from etoile import Etoile
 from meteorite import Meteorite
 from boss import Boss
@@ -61,6 +62,18 @@ ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
 vaisseau = Vaisseau()
 tous_sprites.add(vaisseau)
 
+coeur_0 = Vie((-15, 15))
+coeur_1 = Vie((20, 15))
+coeur_2 = Vie((55, 15))
+coeur_3 = Vie((90, 15))
+coeurs = [coeur_0, coeur_1, coeur_2, coeur_3]
+les_vies.add(coeur_1)
+les_vies.add(coeur_2)
+les_vies.add(coeur_3)
+tous_sprites.add(coeur_1)
+tous_sprites.add(coeur_2)
+tous_sprites.add(coeur_3)
+
 score = Score()
 tous_sprites.add(score)
 
@@ -82,6 +95,7 @@ def game_over():
 
 
 # Game Loop
+cpt_fantome = 100
 accueil = True
 continuer = True
 while continuer:
@@ -170,21 +184,54 @@ while continuer:
         ecran.fill((0, 0, 0))
 
         # Détection des collisions Vaisseau / Ennemi - Vaisseau / Météorite - Vaisseau / Boss
-        if pygame.sprite.spritecollideany(vaisseau, les_ennemis, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_meteorites, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_boss, pygame.sprite.collide_circle):
-            if vaisseau.bouclier:
-                explosion = ExplosionBouclier(vaisseau.rect.center)
-                les_explosions.add(explosion)
-                tous_sprites.add(explosion)
-            if not vaisseau.bouclier:
-                pygame.time.delay(1000)
-                game_over()
-                vaisseau = Vaisseau()
-                tous_sprites.add(vaisseau)
-                score = Score()
-                tous_sprites.add(score)
-                accueil = True     
-                if len(les_boss) == 0:
-                    vague.reset_percent()
+        if vaisseau.fantome:
+            cpt_fantome -= 1
+            vaisseau.surf = pygame.image.load('img/vaisseau_fantome.png')
+            vaisseau.surf = pygame.transform.scale(vaisseau.surf, (70, 70))
+            vaisseau.surf.convert()
+            vaisseau.surf.set_colorkey((255, 255, 255), RLEACCEL)
+            if cpt_fantome <= 0:
+                vaisseau.surf = pygame.image.load('img/vaisseau.png')
+                vaisseau.surf = pygame.transform.scale(vaisseau.surf, (70, 70))
+                vaisseau.surf.convert()
+                vaisseau.surf.set_colorkey((255, 255, 255), RLEACCEL)
+                vaisseau.fantome = False
+                cpt_fantome = 100
+        else:
+            if pygame.sprite.spritecollideany(vaisseau, les_ennemis, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_meteorites, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_boss, pygame.sprite.collide_circle):
+                if vaisseau.bouclier:
+                    explosion = ExplosionBouclier(vaisseau.rect.center)
+                    les_explosions.add(explosion)
+                    tous_sprites.add(explosion)
+                if not vaisseau.bouclier:
+                    explosion = Explosion(vaisseau.rect.center, 150)
+                    les_explosions.add(explosion)
+                    tous_sprites.add(explosion)
+                    coeurs[-1].tuer()
+                    coeurs.remove(coeurs[-1])
+                    vaisseau.vie -= 1
+                    vaisseau.fantome = True
+                    if vaisseau.vie < 0:
+                        pygame.time.delay(1000)
+                        game_over()
+                        vaisseau = Vaisseau()
+                        tous_sprites.add(vaisseau)
+                        coeur_0 = Vie((-15, 15))
+                        coeur_1 = Vie((20, 15))
+                        coeur_2 = Vie((55, 15))
+                        coeur_3 = Vie((90, 15))
+                        coeurs = [coeur_0, coeur_1, coeur_2, coeur_3]
+                        les_vies.add(coeur_1)
+                        les_vies.add(coeur_2)
+                        les_vies.add(coeur_3)
+                        tous_sprites.add(coeur_1)
+                        tous_sprites.add(coeur_2)
+                        tous_sprites.add(coeur_3)
+                        score = Score()
+                        tous_sprites.add(score)
+                        accueil = True     
+                        if len(les_boss) == 0:
+                            vague.reset_percent()
 
         # Détection des collisions Vaisseau / Bouclier
         for bouclier in les_boucliers:

@@ -12,6 +12,7 @@ class Vaisseau(pygame.sprite.Sprite):
 
     def __init__(self):
         super(Vaisseau, self).__init__()
+        self.vie = 3
         self.surf = pygame.image.load('img/vaisseau.png')
         self.surf = pygame.transform.scale(self.surf, (70, 70))
         self.surf.convert()
@@ -28,6 +29,7 @@ class Vaisseau(pygame.sprite.Sprite):
         self.text_tir_infini = TextTirInfini(self)
         tous_sprites.add(self.text_tir_infini)
         self.cpt = 600
+        self.fantome = False
 
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:
