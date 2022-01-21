@@ -54,3 +54,31 @@ class TextBouclier(pygame.sprite.Sprite):
         self.pourcentage = round(self.pourcentage, 2)
         if self.pourcentage <= 0:
             self.pourcentage = 0.00
+
+
+class LogoBouclier(pygame.sprite.Sprite):
+
+    def __init__(self, vaisseau):
+        super(LogoBouclier, self).__init__()
+        self.vaisseau = vaisseau
+        self._hideLogo()
+
+    def _setLogo(self):
+        self.surf = pygame.image.load('img/bouclier.png')
+        self.surf = pygame.transform.scale(self.surf, (30, 30))
+        self.surf.convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=(215, 15))
+
+    def _hideLogo(self):
+        self.surf = pygame.image.load('img/black_bouclier.png')
+        self.surf = pygame.transform.scale(self.surf, (30, 30))
+        self.surf.convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=(215, 15))
+
+    def update(self):
+        if self.vaisseau.bouclier:
+            self._setLogo()
+        else:
+            self._hideLogo()

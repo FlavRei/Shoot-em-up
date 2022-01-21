@@ -2,9 +2,9 @@ import pygame
 from pygame import *
 from sprites import *
 from vaisseau import Vaisseau
-from bouclier import Bouclier, TextBouclier
-from vitesse import Vitesse, TextVitesse
-from tir_infini import TirInfini, TextTirInfini
+from bouclier import Bouclier, LogoBouclier
+from vitesse import Vitesse, LogoVitesse
+from tir_infini import TirInfini, LogoTirInfini
 from explosion import Explosion, ExplosionBouclier
 from ennemi import Ennemi
 from score import Score
@@ -73,6 +73,16 @@ les_vies.add(coeur_3)
 tous_sprites.add(coeur_1)
 tous_sprites.add(coeur_2)
 tous_sprites.add(coeur_3)
+
+logo_bouclier = LogoBouclier(vaisseau)
+logo_vitesse = LogoVitesse(vaisseau)
+logo_tir_infini = LogoTirInfini(vaisseau)
+les_logos.add(logo_bouclier)
+les_logos.add(logo_vitesse)
+les_logos.add(logo_tir_infini)
+tous_sprites.add(logo_bouclier)
+tous_sprites.add(logo_vitesse)
+tous_sprites.add(logo_tir_infini)
 
 score = Score()
 tous_sprites.add(score)
@@ -211,7 +221,7 @@ while continuer:
                     coeurs.remove(coeurs[-1])
                     vaisseau.vie -= 1
                     vaisseau.fantome = True
-                    if vaisseau.vie < 0:
+                    if vaisseau.vie == 0:
                         pygame.time.delay(1000)
                         game_over()
                         vaisseau = Vaisseau()
@@ -227,6 +237,15 @@ while continuer:
                         tous_sprites.add(coeur_1)
                         tous_sprites.add(coeur_2)
                         tous_sprites.add(coeur_3)
+                        logo_bouclier = LogoBouclier(vaisseau)
+                        logo_vitesse = LogoVitesse(vaisseau)
+                        logo_tir_infini = LogoTirInfini(vaisseau)
+                        les_logos.add(logo_bouclier)
+                        les_logos.add(logo_vitesse)
+                        les_logos.add(logo_tir_infini)
+                        tous_sprites.add(logo_bouclier)
+                        tous_sprites.add(logo_vitesse)
+                        tous_sprites.add(logo_tir_infini)
                         score = Score()
                         tous_sprites.add(score)
                         accueil = True     
@@ -290,18 +309,23 @@ while continuer:
         touche_appuyee = pygame.key.get_pressed()
 
         # Mise à jour des éléments
+        les_etoiles.update()
         vaisseau.update(touche_appuyee) 
         les_missiles.update()
         les_ennemis.update()
+        les_meteorites.update()
+        les_boss.update() 
+
         les_explosions.update()
-        les_etoiles.update()
+        
         les_boucliers.update()
         les_vitesses.update()
         les_tirs_infini.update()
+
         score.update()
-        les_meteorites.update()
-        les_boss.update()  
         vague.update_bar(ecran)
+         
+        les_logos.update()
 
         # Les objets sont recopiés sur la surface écran
         for mon_sprite in tous_sprites:

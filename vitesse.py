@@ -54,3 +54,31 @@ class TextVitesse(pygame.sprite.Sprite):
         self.pourcentage = round(self.pourcentage, 2)
         if self.pourcentage <= 0:
             self.pourcentage = 0.00
+
+
+class LogoVitesse(pygame.sprite.Sprite):
+
+    def __init__(self, vaisseau):
+        super(LogoVitesse, self).__init__()
+        self.vaisseau = vaisseau
+        self._hideLogo()
+
+    def _setLogo(self):
+        self.surf = pygame.image.load('img/vitesse.png')
+        self.surf = pygame.transform.scale(self.surf, (30, 40))
+        self.surf.convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=(250, 15))
+
+    def _hideLogo(self):
+        self.surf = pygame.image.load('img/black_vitesse.png')
+        self.surf = pygame.transform.scale(self.surf, (30, 40))
+        self.surf.convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=(250, 15))
+
+    def update(self):
+        if self.vaisseau.vitesse == 10:
+            self._setLogo()
+        else:
+            self._hideLogo()

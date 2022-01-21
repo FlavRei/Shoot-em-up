@@ -54,3 +54,31 @@ class TextTirInfini(pygame.sprite.Sprite):
         self.pourcentage = round(self.pourcentage, 2)
         if self.pourcentage <= 0:
             self.pourcentage = 0.00
+
+
+class LogoTirInfini(pygame.sprite.Sprite):
+
+    def __init__(self, vaisseau):
+        super(LogoTirInfini, self).__init__()
+        self.vaisseau = vaisseau
+        self._hideLogo()
+
+    def _setLogo(self):
+        self.surf = pygame.image.load('img/tir_infini.png')
+        self.surf = pygame.transform.scale(self.surf, (30, 25))
+        self.surf.convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=(285, 15))
+
+    def _hideLogo(self):
+        self.surf = pygame.image.load('img/black_tir_infini.png')
+        self.surf = pygame.transform.scale(self.surf, (30, 25))
+        self.surf.convert()
+        self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        self.rect = self.surf.get_rect(center=(285, 15))
+
+    def update(self):
+        if self.vaisseau.tir_infini:
+            self._setLogo()
+        else:
+            self._hideLogo()
