@@ -5,12 +5,12 @@ import random
 LARGEUR_ECRAN = 800
 HAUTEUR_ECRAN = 600
 
-class Vitesse(pygame.sprite.Sprite):
+class TirInfini(pygame.sprite.Sprite):
 
     def __init__(self):
-        super(Vitesse, self).__init__()
-        self.surf = pygame.image.load('img/vitesse.png')
-        self.surf = pygame.transform.scale(self.surf, (55, 65))
+        super(TirInfini, self).__init__()
+        self.surf = pygame.image.load('img/tir_infini.png')
+        self.surf = pygame.transform.scale(self.surf, (50, 50))
         self.surf.convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center=(LARGEUR_ECRAN + 50, random.randint(0, HAUTEUR_ECRAN)))
@@ -23,26 +23,26 @@ class Vitesse(pygame.sprite.Sprite):
 
 # Création de la police de caractère
 pygame.font.init()
-police_vitesse = pygame.font.SysFont('Comic Sans MS', 25)
+police_tir_infini = pygame.font.SysFont('Comic Sans MS', 25)
 
-class TextVitesse(pygame.sprite.Sprite):
+class TextTirInfini(pygame.sprite.Sprite):
 
     def __init__(self, vaisseau):
-        super(TextVitesse, self).__init__()
+        super(TextTirInfini, self).__init__()
         self.pourcentage = 100
         self.vaisseau = vaisseau
         self._hideText()
 
     def _setText(self):
-        self.surf = police_vitesse.render('Vitesse x2 : '+str(self.pourcentage)+'%', False, (255, 255, 255))
+        self.surf = police_tir_infini.render('Tir Infini : '+str(self.pourcentage)+'%', False, (255, 255, 255))
         self.rect = self.surf.get_rect(center=(self.vaisseau.rect.x + 30, self.vaisseau.rect.y + 90))
 
     def _hideText(self):
-        self.surf = police_vitesse.render('Vitesse x2 : '+str(self.pourcentage)+'%', False, (0, 0, 0))
+        self.surf = police_tir_infini.render('Tir Infini : '+str(self.pourcentage)+'%', False, (0, 0, 0))
         self.rect = self.surf.get_rect(center=(LARGEUR_ECRAN, HAUTEUR_ECRAN))
 
     def update(self):
-        if self.vaisseau.vitesse == 10:
+        if self.vaisseau.tir_infini:
             self.decremente()
             self._setText()
         else:

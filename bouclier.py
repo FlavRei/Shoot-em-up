@@ -10,7 +10,7 @@ class Bouclier(pygame.sprite.Sprite):
     def __init__(self):
         super(Bouclier, self).__init__()
         self.surf = pygame.image.load('img/bouclier.png')
-        self.surf = pygame.transform.scale(self.surf, (60, 60))
+        self.surf = pygame.transform.scale(self.surf, (45, 50))
         self.surf.convert()
         self.surf.set_colorkey((255, 255, 255), RLEACCEL)
         self.rect = self.surf.get_rect(center=(LARGEUR_ECRAN + 50, random.randint(0, HAUTEUR_ECRAN)))

@@ -4,6 +4,7 @@ from sprites import *
 from vaisseau import Vaisseau
 from bouclier import Bouclier, TextBouclier
 from vitesse import Vitesse, TextVitesse
+from tir_infini import TirInfini, TextTirInfini
 from explosion import Explosion, ExplosionBouclier
 from ennemi import Ennemi
 from score import Score
@@ -46,8 +47,11 @@ pygame.time.set_timer(AJOUTE_BOUCLIER, 27000)
 # Événement création d'un vitesse x2
 AJOUTE_VITESSE = pygame.USEREVENT + 4
 pygame.time.set_timer(AJOUTE_VITESSE, 45000)
+# Événement création d'un tir infini
+AJOUTE_TIR_INFINI = pygame.USEREVENT + 5
+pygame.time.set_timer(AJOUTE_TIR_INFINI, 64000)
 # Événement création d'une météorite
-AJOUTE_METEORITE = pygame.USEREVENT + 5
+AJOUTE_METEORITE = pygame.USEREVENT + 6
 pygame.time.set_timer(AJOUTE_METEORITE, 5000)
 
 # Création de la surface principale
@@ -56,12 +60,7 @@ ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
 # Création du vaisseau
 vaisseau = Vaisseau()
 tous_sprites.add(vaisseau)
-text_bouclier = TextBouclier(vaisseau)
-vaisseau.set_text_bouclier(text_bouclier)
-tous_sprites.add(text_bouclier)
-text_vitesse = TextVitesse(vaisseau)
-vaisseau.set_text_vitesse(text_vitesse)
-tous_sprites.add(text_vitesse)
+
 score = Score()
 tous_sprites.add(score)
 
@@ -137,6 +136,12 @@ while continuer:
                 # Ajout du bouclier aux groupes
                 les_vitesses.add(nouveau_vitesse)
                 tous_sprites.add(nouveau_vitesse)
+            # Création d'un nouveau tir infini
+            elif event.type == AJOUTE_TIR_INFINI:
+                nouveau_tir_infini = TirInfini()
+                # Ajout du tir infini aux groupes
+                les_tirs_infini.add(nouveau_tir_infini)
+                tous_sprites.add(nouveau_tir_infini)
             # Création d'une nouvelle météorite
             elif event.type == AJOUTE_METEORITE:
                 nouvelle_meteorite = Meteorite()
@@ -175,12 +180,6 @@ while continuer:
                 game_over()
                 vaisseau = Vaisseau()
                 tous_sprites.add(vaisseau)
-                text_bouclier = TextBouclier(vaisseau)
-                vaisseau.set_text_bouclier(text_bouclier)
-                tous_sprites.add(text_bouclier)
-                text_vitesse = TextVitesse(vaisseau)
-                vaisseau.set_text_vitesse(text_vitesse)
-                tous_sprites.add(text_vitesse)
                 score = Score()
                 tous_sprites.add(score)
                 accueil = True     
@@ -202,6 +201,14 @@ while continuer:
                 vaisseau.reset_bonus()
                 vitesse.kill()
                 vaisseau.set_vitesse(10)
+
+        # Détection des collisions Vaisseau / Tir Infini
+        for tir in les_tirs_infini:
+            liste_tirs_touches = pygame.sprite.spritecollide(vaisseau, les_tirs_infini, False)
+            if len(liste_tirs_touches) > 0:
+                vaisseau.reset_bonus()
+                tir.kill()
+                vaisseau.set_tir_infini(True)
                 
         # Détection des collisions Missile / Ennemi
         for missile in les_missiles:
@@ -236,15 +243,14 @@ while continuer:
         touche_appuyee = pygame.key.get_pressed()
 
         # Mise à jour des éléments
-        vaisseau.update(touche_appuyee)
-        text_bouclier.update()
-        text_vitesse.update()
+        vaisseau.update(touche_appuyee) 
         les_missiles.update()
         les_ennemis.update()
         les_explosions.update()
         les_etoiles.update()
         les_boucliers.update()
         les_vitesses.update()
+        les_tirs_infini.update()
         score.update()
         les_meteorites.update()
         les_boss.update()  
