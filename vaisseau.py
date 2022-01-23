@@ -1,6 +1,7 @@
 import pygame
 from pygame import *
 from sprites import *
+from vie import Vie
 from bouclier import TextBouclier
 from vitesse import TextVitesse
 from tir_infini import TextTirInfini
@@ -13,6 +14,7 @@ class Vaisseau(pygame.sprite.Sprite):
     def __init__(self):
         super(Vaisseau, self).__init__()
         self.vie = 3
+        self.init_health()
         self.surf = pygame.image.load('img/vaisseau.png')
         self.surf = pygame.transform.scale(self.surf, (70, 70))
         self.surf.convert()
@@ -30,6 +32,45 @@ class Vaisseau(pygame.sprite.Sprite):
         tous_sprites.add(self.text_tir_infini)
         self.cpt = 600
         self.fantome = False
+
+    def init_health(self):
+        self.coeur_1 = Vie((20, 15))
+        self.coeur_2 = Vie((55, 15))
+        self.coeur_3 = Vie((90, 15))
+        self.coeurs = [self.coeur_1, self.coeur_2, self.coeur_3]
+        les_vies.add(self.coeur_1)
+        les_vies.add(self.coeur_2)
+        les_vies.add(self.coeur_3)
+        tous_sprites.add(self.coeur_1)
+        tous_sprites.add(self.coeur_2)
+        tous_sprites.add(self.coeur_3)
+
+    def add_vie(self):
+        if len(self.coeurs) == 1:
+            self.coeur_2 = Vie((55, 15))
+            self.coeurs.append(self.coeur_2)
+            les_vies.add(self.coeur_2)
+            tous_sprites.add(self.coeur_2)
+            self.vie += 1
+        elif len(self.coeurs) == 2:
+            self.coeur_3 = Vie((90, 15))
+            self.coeurs.append(self.coeur_3)
+            les_vies.add(self.coeur_3)
+            tous_sprites.add(self.coeur_3)
+            self.vie += 1
+
+    def set_mode_fantome(self, bool):
+        if bool:
+            self.surf = pygame.image.load('img/vaisseau_fantome.png')
+            self.surf = pygame.transform.scale(self.surf, (70, 70))
+            self.surf.convert()
+            self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+        else:
+            self.surf = pygame.image.load('img/vaisseau.png')
+            self.surf = pygame.transform.scale(self.surf, (70, 70))
+            self.surf.convert()
+            self.surf.set_colorkey((255, 255, 255), RLEACCEL)
+            self.fantome = False
 
     def update(self, pressed_keys):
         if pressed_keys[K_UP]:

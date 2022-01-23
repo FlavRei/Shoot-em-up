@@ -8,7 +8,7 @@ from tir_infini import TirInfini, LogoTirInfini
 from explosion import Explosion, ExplosionBouclier
 from ennemi import Ennemi
 from score import Score
-from vie import Vie
+from vie import BonusVie, Vie
 from etoile import Etoile
 from meteorite import Meteorite
 from boss import Boss
@@ -42,17 +42,20 @@ pygame.time.set_timer(AJOUTE_ENNEMI, 750)
 # Événement création d'une étoile
 AJOUTE_ETOILE = pygame.USEREVENT + 2
 pygame.time.set_timer(AJOUTE_ETOILE, 50)
-# Événement création d'un bouclier
+# Événement création d'un bonus bouclier
 AJOUTE_BOUCLIER = pygame.USEREVENT + 3
 pygame.time.set_timer(AJOUTE_BOUCLIER, 27000)
-# Événement création d'un vitesse x2
+# Événement création d'un bonus vitesse x2
 AJOUTE_VITESSE = pygame.USEREVENT + 4
 pygame.time.set_timer(AJOUTE_VITESSE, 45000)
-# Événement création d'un tir infini
+# Événement création d'un bonus tir infini
 AJOUTE_TIR_INFINI = pygame.USEREVENT + 5
 pygame.time.set_timer(AJOUTE_TIR_INFINI, 64000)
+# Événement création d'un bonus vie
+AJOUTE_VIE = pygame.USEREVENT + 6
+pygame.time.set_timer(AJOUTE_VIE, 100000)
 # Événement création d'une météorite
-AJOUTE_METEORITE = pygame.USEREVENT + 6
+AJOUTE_METEORITE = pygame.USEREVENT + 7
 pygame.time.set_timer(AJOUTE_METEORITE, 5000)
 
 # Création de la surface principale
@@ -61,18 +64,6 @@ ecran = pygame.display.set_mode([LARGEUR_ECRAN, HAUTEUR_ECRAN])
 # Création du vaisseau
 vaisseau = Vaisseau()
 tous_sprites.add(vaisseau)
-
-coeur_0 = Vie((-15, 15))
-coeur_1 = Vie((20, 15))
-coeur_2 = Vie((55, 15))
-coeur_3 = Vie((90, 15))
-coeurs = [coeur_0, coeur_1, coeur_2, coeur_3]
-les_vies.add(coeur_1)
-les_vies.add(coeur_2)
-les_vies.add(coeur_3)
-tous_sprites.add(coeur_1)
-tous_sprites.add(coeur_2)
-tous_sprites.add(coeur_3)
 
 logo_bouclier = LogoBouclier(vaisseau)
 logo_vitesse = LogoVitesse(vaisseau)
@@ -166,6 +157,12 @@ while continuer:
                 # Ajout du tir infini aux groupes
                 les_tirs_infini.add(nouveau_tir_infini)
                 tous_sprites.add(nouveau_tir_infini)
+            # Création d'une nouvelle vie
+            elif event.type == AJOUTE_VIE:
+                nouvelle_vie = BonusVie()
+                # Ajout de la vie aux groupes
+                les_bonus_vie.add(nouvelle_vie)
+                tous_sprites.add(nouvelle_vie)
             # Création d'une nouvelle météorite
             elif event.type == AJOUTE_METEORITE:
                 nouvelle_meteorite = Meteorite()
@@ -196,16 +193,9 @@ while continuer:
         # Détection des collisions Vaisseau / Ennemi - Vaisseau / Météorite - Vaisseau / Boss
         if vaisseau.fantome:
             cpt_fantome -= 1
-            vaisseau.surf = pygame.image.load('img/vaisseau_fantome.png')
-            vaisseau.surf = pygame.transform.scale(vaisseau.surf, (70, 70))
-            vaisseau.surf.convert()
-            vaisseau.surf.set_colorkey((255, 255, 255), RLEACCEL)
+            vaisseau.set_mode_fantome(True)
             if cpt_fantome <= 0:
-                vaisseau.surf = pygame.image.load('img/vaisseau.png')
-                vaisseau.surf = pygame.transform.scale(vaisseau.surf, (70, 70))
-                vaisseau.surf.convert()
-                vaisseau.surf.set_colorkey((255, 255, 255), RLEACCEL)
-                vaisseau.fantome = False
+                vaisseau.set_mode_fantome(False)
                 cpt_fantome = 100
         else:
             if pygame.sprite.spritecollideany(vaisseau, les_ennemis, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_meteorites, pygame.sprite.collide_circle) or pygame.sprite.spritecollideany(vaisseau, les_boss, pygame.sprite.collide_circle):
@@ -217,8 +207,8 @@ while continuer:
                     explosion = Explosion(vaisseau.rect.center, 150)
                     les_explosions.add(explosion)
                     tous_sprites.add(explosion)
-                    coeurs[-1].tuer()
-                    coeurs.remove(coeurs[-1])
+                    vaisseau.coeurs[-1].tuer()
+                    vaisseau.coeurs.remove(vaisseau.coeurs[-1])
                     vaisseau.vie -= 1
                     vaisseau.fantome = True
                     if vaisseau.vie == 0:
@@ -226,17 +216,6 @@ while continuer:
                         game_over()
                         vaisseau = Vaisseau()
                         tous_sprites.add(vaisseau)
-                        coeur_0 = Vie((-15, 15))
-                        coeur_1 = Vie((20, 15))
-                        coeur_2 = Vie((55, 15))
-                        coeur_3 = Vie((90, 15))
-                        coeurs = [coeur_0, coeur_1, coeur_2, coeur_3]
-                        les_vies.add(coeur_1)
-                        les_vies.add(coeur_2)
-                        les_vies.add(coeur_3)
-                        tous_sprites.add(coeur_1)
-                        tous_sprites.add(coeur_2)
-                        tous_sprites.add(coeur_3)
                         logo_bouclier = LogoBouclier(vaisseau)
                         logo_vitesse = LogoVitesse(vaisseau)
                         logo_tir_infini = LogoTirInfini(vaisseau)
@@ -275,6 +254,13 @@ while continuer:
                 vaisseau.reset_bonus()
                 tir.kill()
                 vaisseau.set_tir_infini(True)
+
+        # Détection des collisions Vaisseau / Vie
+        for vie in les_bonus_vie:
+            liste_vies_touches = pygame.sprite.spritecollide(vaisseau, les_bonus_vie, False)
+            if len(liste_vies_touches) > 0:
+                vie.kill()
+                vaisseau.add_vie()
                 
         # Détection des collisions Missile / Ennemi
         for missile in les_missiles:
@@ -321,6 +307,7 @@ while continuer:
         les_boucliers.update()
         les_vitesses.update()
         les_tirs_infini.update()
+        les_bonus_vie.update()
 
         score.update()
         vague.update_bar(ecran)
