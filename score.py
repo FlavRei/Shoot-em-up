@@ -15,6 +15,9 @@ class Score(pygame.sprite.Sprite):
         self._scoreCourant = 0
         self._setText()
 
+    def getScore(self):
+        return self._scoreCourant
+
     def _setText(self):
         self.surf = police_score.render('Score : '+str(self._scoreCourant), False, (255, 255, 255))
         self.rect = self.surf.get_rect(center=(LARGEUR_ECRAN / 2, 15))
